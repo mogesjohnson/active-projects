@@ -44,8 +44,13 @@ Your list is stored in your browser (`localStorage`) on your device only.
 
 ```sh
 python3 -m http.server 8000   # then open http://localhost:8000
-node --check app.js && node --check sw.js
+npm run check   # node --check on the JS, manifest JSON check
+npm test        # unit tests, Node 20+ built-in runner, nothing to install
 ```
+
+The list logic lives in `logic.js` (a plain script the page loads before `app.js`, also
+`require`-able from Node), and the tests in `test/` exercise it with a fake `localStorage`.
+CI runs the same checks on every push and pull request.
 
 When you change files, bump `CACHE` in `sw.js` so installed copies pick up the update.
 Agent and contribution rules are in [AGENTS.md](AGENTS.md) and [RULES.md](RULES.md).
