@@ -17,13 +17,16 @@ Run these from the repo root. They are the only definition of "checks pass".
 
 <!-- REPO-SPECIFIC: replace with the real commands. Delete any that do not exist. -->
 - No install, no build. Serve the root folder: `python3 -m http.server 8000`.
-- Syntax check: `node --check app.js && node --check sw.js`.
+- Syntax and manifest check: `npm run check`.
+- Unit tests (Node 20+, built-in `node:test`, no install): `npm test`.
 <!-- /REPO-SPECIFIC -->
 
 ## Where things live
 
 <!-- REPO-SPECIFIC: five to ten lines. Path, then what it holds. No full tree. -->
-- `index.html`, `styles.css`, `app.js`: the app.
+- `index.html`, `styles.css`, `app.js`: the app (DOM, drag, events).
+- `logic.js`: pure list logic (validate, load/save, add/move/remove/reorder), loaded by the page.
+- `test/`: `node:test` unit tests. `.github/workflows/ci.yml` runs checks and tests.
 - `manifest.webmanifest`, `icon.svg`, `icon-*.png`, `sw.js`: install and offline support.
 <!-- /REPO-SPECIFIC -->
 

@@ -1,0 +1,10 @@
+{
+  "name": "active-projects",
+  "private": true,
+  "description": "Dev tooling only. The site itself has no build step and no dependencies.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "check": "node --check app.js && node --check logic.js && node --check sw.js && node -e \"JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))\"",
+    "test": "node --test test/"
+  }
+}

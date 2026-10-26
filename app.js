@@ -1,58 +1,23 @@
 'use strict';
 (function () {
-  const KEY = 'active-projects:v1';
-  const GH = 'https://github.com/mogesjohnson/';
-  const SEED_ACTIVE = ['active-projects', 'history-scrub', 'BEST-OF-AI-DEV'];
-  const SEED_INACTIVE = [
-    'shadow-army', 'care-reminder', 'spec-to-tests', 'codebase-map', 'release-notes',
-    'agent-deck', 'rules-sync', 'repo-health', 'demo-reel', 'app-update-checker',
-    'post-it-board', 'how-to-post-it', 'shadow-docs', 'trace-workbench', 'Personal-Portfolio'
-  ];
+  const L = globalThis.ActiveProjectsLogic;
+  const { GH, uid, seed, isHttpUrl, validate } = L;
 
   const $ = (s) => document.querySelector(s);
   const lists = { true: $('#list-active'), false: $('#list-inactive') };
   let projects = [];
 
-  const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
-  const seed = () => SEED_ACTIVE.map((n) => ({ name: n, active: true }))
-    .concat(SEED_INACTIVE.map((n) => ({ name: n, active: false })))
-    .map((p) => ({ id: uid(), name: p.name, url: GH + p.name, note: '', active: p.active }));
-
-  function isHttpUrl(u) {
-    try { const x = new URL(u); return x.protocol === 'https:' || x.protocol === 'http:'; }
-    catch (e) { return false; }
-  }
-
-  // Validate untrusted data (localStorage or an imported file). Throws on bad input.
-  function validate(data) {
-    const arr = Array.isArray(data) ? data : data && Array.isArray(data.projects) ? data.projects : null;
-    if (!arr) throw new Error('Expected {"projects": [...]} or an array.');
-    if (arr.length > 1000) throw new Error('Too many projects (max 1000).');
-    const seen = new Set();
-    return arr.map((p, i) => {
-      if (!p || typeof p !== 'object') throw new Error('Item ' + (i + 1) + ' is not an object.');
-      const name = typeof p.name === 'string' ? p.name.trim() : '';
-      if (!name || name.length > 100) throw new Error('Item ' + (i + 1) + ' needs a name (1-100 chars).');
-      const url = p.url == null || p.url === '' ? GH + encodeURIComponent(name) : String(p.url);
-      if (!isHttpUrl(url)) throw new Error('Item ' + (i + 1) + ' has an invalid URL.');
-      const note = p.note == null ? '' : String(p.note).slice(0, 200);
-      let id = typeof p.id === 'string' && p.id ? p.id.slice(0, 40) : uid();
-      if (seen.has(id)) id = uid();
-      seen.add(id);
-      return { id, name, url, note, active: p.active === true };
-    });
+  // Reading window.localStorage can itself throw (blocked storage), so guard it.
+  function storage() {
+    try { return window.localStorage; } catch (e) { return null; }
   }
 
   function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) return validate(JSON.parse(raw));
-    } catch (e) { console.warn('Stored data invalid, using defaults', e); }
-    return seed();
+    return L.load(storage());
   }
 
   function save() {
-    try { localStorage.setItem(KEY, JSON.stringify({ version: 1, projects })); }
+    try { L.save(storage(), projects); }
     catch (e) { msg('Could not save: ' + e.message, true); }
   }
 
@@ -83,15 +48,8 @@
 
   // Rebuild state order from the DOM after a drag.
   function syncFromDom() {
-    const byId = new Map(projects.map((p) => [p.id, p]));
-    const next = [];
-    for (const key of ['true', 'false']) {
-      for (const li of lists[key].children) {
-        const p = byId.get(li.dataset.id);
-        if (p) { p.active = key === 'true'; next.push(p); }
-      }
-    }
-    projects = next;
+    const ids = (key) => [...lists[key].children].map((li) => li.dataset.id);
+    projects = L.reorder(projects, ids('true'), ids('false'));
     save();
     render();
   }
@@ -164,14 +122,11 @@
     if (!p) return;
     if (e.target.closest('.move')) {
       // Move to the end of active list or top of the inactive list.
-      projects = projects.filter((x) => x !== p);
-      p.active = !p.active;
-      const firstInactive = projects.findIndex((x) => !x.active);
-      projects.splice(firstInactive < 0 ? projects.length : firstInactive, 0, p);
+      projects = L.toggleActive(projects, p.id);
       save(); render();
     } else if (e.target.closest('.remove')) {
       if (confirm('Remove "' + p.name + '"?')) {
-        projects = projects.filter((x) => x !== p);
+        projects = L.removeProject(projects, p.id);
         save(); render(); msg('Removed ' + p.name + '.');
       }
     }
@@ -185,10 +140,7 @@
     if (!name) return msg('Name is required.', true);
     if (!isHttpUrl(url)) return msg('URL must start with http:// or https://', true);
     const p = { id: uid(), name, url, note: f.note.value.trim(), active: f.active.checked };
-    if (p.active) {
-      const i = projects.findIndex((x) => !x.active);
-      projects.splice(i < 0 ? projects.length : i, 0, p);
-    } else projects.push(p);
+    projects = L.addProject(projects, p);
     save(); render(); f.reset(); f.active.checked = true;
     msg('Added ' + name + '.');
   }
