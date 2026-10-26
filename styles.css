@@ -1,0 +1,74 @@
+:root {
+  --bg: #0f1115; --panel: #171a21; --card: #1d212a; --line: #2a2f3a;
+  --text: #e7e9ee; --muted: #8b93a3; --accent: #5b9dff; --on: #3ecf8e; --danger: #ff6b6b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color: transparent;
+}
+.top { padding: 20px 16px 8px; max-width: 640px; margin: 0 auto; }
+h1 { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+main { max-width: 640px; margin: 0 auto; padding: 0 12px; }
+.status { margin: 4px 0 0; font-size: .8rem; color: var(--muted); }
+.group { margin: 16px 0 20px; }
+.group h2, .panel h2 {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+  margin: 0 4px 8px;
+}
+.count { background: var(--line); color: var(--text); border-radius: 999px; padding: 0 8px; font-size: .75rem; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.on { background: var(--on); box-shadow: 0 0 8px var(--on); }
+.list {
+  list-style: none; margin: 0; padding: 6px; min-height: 64px;
+  border: 1px dashed var(--line); border-radius: 14px; display: grid; gap: 8px;
+}
+.list.over { border-color: var(--accent); background: rgba(91,157,255,.06); }
+.list:empty::before { content: "Drag projects here"; color: var(--muted); font-size: .85rem; padding: 14px; text-align: center; }
+.card {
+  display: flex; align-items: center; gap: 8px; background: var(--card);
+  border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-height: 56px;
+  transition: box-shadow .15s, transform .15s;
+}
+#list-active .card { border-left: 3px solid var(--on); }
+.card.dragging { box-shadow: 0 10px 30px rgba(0,0,0,.5); transform: scale(1.02); border-color: var(--accent); z-index: 2; position: relative; }
+.handle {
+  touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none;
+  width: 40px; height: 44px; flex: none; border: 0; border-radius: 8px;
+  background: transparent; color: var(--muted); font-size: 18px; letter-spacing: -3px;
+}
+.handle:active { cursor: grabbing; background: var(--line); }
+.body { flex: 1; min-width: 0; }
+.name { color: var(--text); font-weight: 600; text-decoration: none; word-break: break-word; }
+.name:hover, .name:focus { color: var(--accent); }
+.note { margin: 2px 0 0; color: var(--muted); font-size: .85rem; word-break: break-word; }
+.note:empty { display: none; }
+button, .button {
+  font: inherit; color: var(--text); background: var(--line); border: 1px solid transparent;
+  border-radius: 10px; padding: 10px 14px; min-height: 44px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+button:focus-visible, .button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.move { flex: none; font-size: .78rem; padding: 6px 10px; min-height: 40px; }
+.remove { flex: none; background: transparent; color: var(--muted); width: 40px; min-height: 40px; padding: 0; }
+.remove:hover { color: var(--danger); }
+.primary { background: var(--accent); color: #fff; font-weight: 600; }
+.ghost { background: transparent; border-color: var(--line); color: var(--muted); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin: 16px 0; }
+form { display: grid; gap: 10px; }
+label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+label.row { display: flex; align-items: center; gap: 8px; }
+.opt { font-size: .75rem; }
+input:not([type=checkbox]) {
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; min-height: 44px; width: 100%;
+}
+input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.message { margin: 10px 0 0; font-size: .85rem; color: var(--muted); min-height: 1em; }
+.message.error { color: var(--danger); }
+body.drag-active { user-select: none; -webkit-user-select: none; }

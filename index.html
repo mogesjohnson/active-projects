@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="description" content="Which of my projects are active right now.">
+  <title>Active Projects</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Active Projects</h1>
+    <p id="storage-status" class="status" role="status">Checking storage…</p>
+  </header>
+
+  <main>
+    <section class="group" aria-labelledby="h-active">
+      <h2 id="h-active"><span class="dot on"></span>Active <span class="count" id="count-active">0</span></h2>
+      <ul class="list" id="list-active" data-active="true"></ul>
+    </section>
+    <section class="group" aria-labelledby="h-inactive">
+      <h2 id="h-inactive"><span class="dot"></span>Not active <span class="count" id="count-inactive">0</span></h2>
+      <ul class="list" id="list-inactive" data-active="false"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Add project</h2>
+      <form id="add-form" autocomplete="off">
+        <label>Name <input name="name" required maxlength="100" placeholder="repo-name"></label>
+        <label>URL <span class="opt">(optional)</span>
+          <input name="url" type="url" placeholder="https://github.com/mogesjohnson/repo-name"></label>
+        <label>Note <span class="opt">(optional)</span> <input name="note" maxlength="200"></label>
+        <label class="row"><input name="active" type="checkbox" checked> Active</label>
+        <button type="submit" class="primary">Add</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Backup</h2>
+      <div class="actions">
+        <button type="button" id="export-btn">Export JSON</button>
+        <label class="button" for="import-file">Import JSON</label>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+        <button type="button" id="reset-btn" class="ghost">Reset to defaults</button>
+      </div>
+      <p id="message" class="message" role="alert"></p>
+    </section>
+  </main>
+
+  <template id="card-tpl">
+    <li class="card">
+      <button type="button" class="handle" aria-label="Drag to reorder">⋮⋮</button>
+      <div class="body">
+        <a class="name" target="_blank" rel="noopener"></a>
+        <p class="note"></p>
+      </div>
+      <button type="button" class="move" title="Move to other section"></button>
+      <button type="button" class="remove" aria-label="Remove">✕</button>
+    </li>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
