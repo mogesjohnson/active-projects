@@ -63,3 +63,16 @@ test('validated lists keep working with add/toggle/remove', () => {
   ps = L.removeProject(ps, ps[0].id);
   assert.deepEqual(ps.map((p) => p.name + ':' + p.active), ['z:true', 'y:true']);
 });
+
+test('interleaved imported/stored order is normalized so moves land in the right place', () => {
+  const ps = L.validate([
+    { id: 'a1', name: 'a1', active: true }, { id: 'i1', name: 'i1' },
+    { id: 'a2', name: 'a2', active: true }, { id: 'i2', name: 'i2' }
+  ]);
+  // Visible order inside each section is unchanged; active items come first.
+  assert.equal(view(ps), '+a1 +a2 -i1 -i2');
+  // Activate lands at the end of Active, Pause at the top of Not active.
+  assert.equal(view(L.toggleActive(ps, 'i2')), '+a1 +a2 +i2 -i1');
+  assert.equal(view(L.toggleActive(ps, 'a1')), '+a2 -a1 -i1 -i2');
+  assert.equal(view(L.addProject(ps, P('n', true))), '+a1 +a2 +n -i1 -i2');
+});

@@ -31,7 +31,7 @@
     if (!arr) throw new Error('Expected {"projects": [...]} or an array.');
     if (arr.length > MAX_PROJECTS) throw new Error('Too many projects (max ' + MAX_PROJECTS + ').');
     const seen = new Set();
-    return arr.map((p, i) => {
+    const out = arr.map((p, i) => {
       if (!p || typeof p !== 'object') throw new Error('Item ' + (i + 1) + ' is not an object.');
       const name = typeof p.name === 'string' ? p.name.trim() : '';
       if (!name || name.length > 100) throw new Error('Item ' + (i + 1) + ' needs a name (1-100 chars).');
@@ -43,6 +43,8 @@
       seen.add(id);
       return { id, name, url, note, active: p.active === true };
     });
+    // Keep Active items first (order within each section unchanged): add and move rely on it.
+    return out.filter((p) => p.active).concat(out.filter((p) => !p.active));
   }
 
   // Read the saved list. Missing, unreadable or invalid data falls back to the seed list.
