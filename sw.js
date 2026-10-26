@@ -1,6 +1,6 @@
 'use strict';
 // Minimal offline cache: precache the app shell, serve cache first, refresh in the background.
-const CACHE = 'active-projects-v2';
+const CACHE = 'active-projects-v3';
 const ASSETS = ['./', 'index.html', 'styles.css', 'app.js', 'logic.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
