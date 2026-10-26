@@ -246,5 +246,8 @@
     if (confirm('Reset the list to the default projects?')) { projects = seed(); save(); render(); msg('Reset.'); }
   });
   storageStatus().catch(() => { $('#storage-status').textContent = 'Saved on this device.'; });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW failed', err));
+  }
   window.__activeProjects = { validate, get: () => projects };
 })();
