@@ -3,6 +3,7 @@
 // Loaded as a plain <script>; exposes globalThis.ActiveProjectsLogic and, under Node, module.exports.
 (function (root) {
   const KEY = 'active-projects:v1';
+  const BACKUP_KEY = KEY + ':corrupt-backup';
   const GH = 'https://github.com/mogesjohnson/';
   const MAX_PROJECTS = 1000;
   const SEED_ACTIVE = ['active-projects', 'history-scrub', 'BEST-OF-AI-DEV'];
@@ -48,14 +49,26 @@
   }
 
   // Read the saved list. Missing, unreadable or invalid data falls back to the seed list.
+  // Invalid data is first copied to BACKUP_KEY so the next save cannot destroy it.
   function load(storage, makeId = uid) {
+    let raw;
     try {
-      const raw = storage && storage.getItem(KEY);
+      raw = storage && storage.getItem(KEY);
       if (raw) return validate(JSON.parse(raw), makeId);
     } catch (e) {
       if (typeof console !== 'undefined') console.warn('Stored data invalid, using defaults', e);
+      if (raw) backupCorrupt(storage, raw);
     }
     return seed(makeId);
+  }
+
+  function backupCorrupt(storage, raw) {
+    try {
+      storage.setItem(BACKUP_KEY, raw);
+      if (typeof console !== 'undefined') console.warn('Invalid stored data was backed up to ' + BACKUP_KEY);
+    } catch (e) {
+      if (typeof console !== 'undefined') console.warn('Could not back up invalid stored data', e);
+    }
   }
 
   // Write the list. Throws if storage is unavailable or full; the caller reports it.
@@ -106,7 +119,7 @@
   }
 
   const api = {
-    KEY, GH, MAX_PROJECTS, uid, seed, isHttpUrl, validate, load, save,
+    KEY, BACKUP_KEY, GH, MAX_PROJECTS, uid, seed, isHttpUrl, validate, load, save,
     addProject, toggleActive, removeProject, reorder
   };
   root.ActiveProjectsLogic = api;
