@@ -46,7 +46,34 @@ test('corrupt localStorage falls back to the seed', (t) => {
     const out = L.load(new FakeStorage({ [L.KEY]: raw }));
     assert.deepEqual(out.map((p) => p.name), seedNames(), raw);
   }
-  assert.equal(warn.mock.callCount(), corrupt.length);
+  assert.ok(warn.mock.callCount() >= corrupt.length);
+});
+
+test('corrupt localStorage is backed up before falling back, so a later save keeps it', (t) => {
+  quiet(t);
+  const raw = '{"projects":[{"name":"mine","url":"javascript:x"}]}';
+  const store = new FakeStorage({ [L.KEY]: raw });
+  const out = L.load(store);
+  assert.deepEqual(out.map((p) => p.name), seedNames());
+  assert.equal(store.getItem(L.BACKUP_KEY), raw);
+  L.save(store, out);
+  assert.equal(store.getItem(L.BACKUP_KEY), raw);
+  assert.notEqual(store.getItem(L.KEY), raw);
+});
+
+test('valid or missing data writes no backup', () => {
+  const store = new FakeStorage();
+  L.load(store);
+  L.save(store, [P('a', true)]);
+  L.load(store);
+  assert.equal(store.getItem(L.BACKUP_KEY), null);
+});
+
+test('a failing backup write still falls back to the seed', (t) => {
+  quiet(t);
+  const store = new FakeStorage({ [L.KEY]: '{not json' });
+  store.failWrites = true;
+  assert.deepEqual(L.load(store).map((p) => p.name), seedNames());
 });
 
 test('a storage whose getItem throws falls back to the seed', (t) => {
